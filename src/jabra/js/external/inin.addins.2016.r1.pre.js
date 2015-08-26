@@ -1,0 +1,6 @@
+/**
+ * Copyright 2015 Interactive Intelligence, Inc.
+ * All rights reserved.
+ * @preserve
+ */
+!function(e){"use strict";function t(e){var t=document.createElement("script");t.type="text/javascript",t.src=e;var r=n.getAttribute("data-callback");r&&t.setAttribute("data-callback",r),n.parentNode.insertBefore(t,n)}function r(a){if(a.source===s)try{var n=JSON.parse(a.data);"callback"===n.type&&"resolved"===n.state&&n.correlationId===o&&"core.getApiScriptUrl"===n.key&&(e.removeEventListener("message",r),t(n.data.apiScriptUrl))}catch(e){console.warn(e,"Unable to process message provided by message event.")}}function a(e,t,r){if(i){var a=e.document.createEvent("MessageEvent");a.initMessageEvent("message",!0,!0,t,location.protocol+"//"+location.host,"",window,null),e.dispatchEvent(a)}else e.postMessage(t,r)}var n,s=e.top,i="object"==typeof MessageEvent&&(/MSIE/.test(navigator.userAgent)||/Trident/.test(navigator.userAgent)),o=+new Date;if(n=document.currentScript||Array.prototype.slice.call(document.getElementsByTagName("script")).filter(function(e){return/inin\.addins\.js/.test(e.src)})[0],!s)throw new Error("Add-in windows must be loaded in an iframe.");e.addEventListener("message",r),a(s,JSON.stringify({type:"function",key:"core.getApiScriptUrl",correlationId:o,data:{args:[]}}),["*"])}(window);
