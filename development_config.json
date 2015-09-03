@@ -1,0 +1,4 @@
+{
+    "port" : 8888,
+    "connecturl": "https://cl-ubuntuws1.ininlab.com/webic_client_systest/latest/client/#/logon"
+}

@@ -1,5 +1,4 @@
 var http = require("http");
-var https = require("https");
 var config = require('./development_config.json');
 var express = require('express');
 var cicProxy = require('./cicproxy.js');

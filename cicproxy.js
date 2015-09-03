@@ -41,7 +41,7 @@ module.exports = function(){
         }
         else{
             //anything else should get proxied to the web client
-            proxy.web(req, res, { target: config.connecturl });
+            proxy.web(req, res, { target: config.connecturl});
             //next();
         }
     }

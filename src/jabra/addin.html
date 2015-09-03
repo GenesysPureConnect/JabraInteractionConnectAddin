@@ -1,37 +1,65 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" ng-app='connectaddin'>
 <head lang="en">
-    <meta charset="UTF-8">
-    <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.4/angular.js"></script>
-    <script type="text/javascript" src="../js/external/inin.addins.2016.r1.pre.js" data-callback="addinInitializationServiceCallback"></script>
+  <meta charset="UTF-8">
+  <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.4/angular.js"></script>
+  <script type="text/javascript" src="../js/external/inin.addins.2016.r1.pre.js" data-callback="addinInitializationServiceCallback"></script>
 
-    <script src="js/app.js"></script>
-    <script src="js/InitializationService.js"></script>
-    <script src="js/queueService.js"></script>
-    <script src="js/jabraDeviceService.js"></script>
-    <script src="js/mainController.js"></script>
-
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-MfvZlkHCEqatNoGiOXveE8FIwMzZg4W85qfrfIFBfYc= sha512-dTfge/zgoMYpP7QbHy4gWMEGsbsdZeCXz7irItjcC3sPUFtf0kuFbDz/ixG7ArTxmDjLXDmezHubeNikyKGVyQ==" crossorigin="anonymous">
+  <script src="js/app.js"></script>
+  <script src="js/InitializationService.js"></script>
+  <script src="js/queueService.js"></script>
+  <script src="js/jabraDeviceService.js"></script>
+  <script src="js/mainController.js"></script>
+  <script src="js/icwsSessionService.js"></script>
+  <script src="js/interactionService.js"></script>
+  <style>
+  .pad-left{
+    margin-left:5px;
+  }
+  </style>
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-MfvZlkHCEqatNoGiOXveE8FIwMzZg4W85qfrfIFBfYc= sha512-dTfge/zgoMYpP7QbHy4gWMEGsbsdZeCXz7irItjcC3sPUFtf0kuFbDz/ixG7ArTxmDjLXDmezHubeNikyKGVyQ==" crossorigin="anonymous">
 </head>
-<body>
-    <div ng-controller='MainController'>
-        <label class='pull-left'>Connection Status:</label>
-        <div ng-hide='isConnecting' class='pull-left'>
-            <div ng-show='isConnected'>
-                Connected
-            </div>
-            <div ng-hide='isConnected'>
-                Not Connected
-            </div>
+<body style='padding:20px'>
+  <div ng-controller='MainController'>
+    <div  class='clearfix'>
+      <label class='pull-left'>Connection Status:</label>
+      <div ng-hide='isConnecting' class='pull-left pad-left'>
+        <div ng-show='isConnected'>
+          Connected
         </div>
-        <div ng-show='isConnecting' class='pull-left'>
-                Connecting
-
+        <div ng-hide='isConnected'>
+          Not Connected
         </div>
-        <button ng-click="connect()" type="button" class="btn btn-info btn-xs">
-            Connect
-        </button>
+      </div>
+      <div ng-show='isConnecting' class='pull-left pad-left'>
+        Connecting
+      </div>
+      <button ng-show='!isConnected' ng-click="connect()" type="button" class="btn btn-info btn-xs pad-left">
+        Connect
+      </button>
 
     </div>
+    <div class='clearfix form-inline'>
+      <div class='form-group'>
+        <label >Active Device:</label>
+        <select class=' pad-left form-control' ng-model='activeDevice' ng-change='updateActiveDevice()'>
+          <option ng-repeat="d in devices" value="{{d}}">{{d}}</option>
+      </select>
+    </div>
+    <!--
+    <div class='clearfix form-inline'>
+      <div class='form-group'>
+        <label >Mute State:</label>
+        <label class='label label-danger'>Muted</label>
+    </div>-->
+    </div>
+    <div class='clearfix form-inline'>
+      <div class='form-group'>
+        <label >Hook State:</label>
+        <label class='label '>On hook</label>
+
+    </div>
+    </div>
+  </div>
 </body>
 </html>
