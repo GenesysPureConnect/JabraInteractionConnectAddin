@@ -1,11 +1,15 @@
-clientaddin.factory('IcwsSessionService', function ($rootScope, $log, $http, http) {
+clientaddin.factory('IcwsSessionService', function ($rootScope, $log, http) {
   isConnected = false;
   serverUrl = '';
+  sessionId = null;
+  csrfToken = null;
 
   function getConnection(){
     var baseUrl = ININ.Addins.IC.getIcwsBaseUrl();
+    console.log("get connection")
     ININ.Addins.IC.requestIcwsConnectionRequestSettings().then(function(connectionRequestSettings) {
        // POST icws/connection
+       console.log("promise")
        connect(baseUrl,connectionRequestSettings);
 
     });

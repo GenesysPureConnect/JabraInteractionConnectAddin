@@ -1,8 +1,11 @@
-clientaddin.factory('InteractionService', function ($rootScope, $log, QueueService,IcwsSessionService) {
+clientaddin.factory('InteractionService', function ($rootScope, $log, QueueService, IcwsSessionService) {
 
       return{
         answerAlertingCall: function(){
-
+            var alertingInteractionId = QueueService.alertingInteraction()
+            if(alertingInteractionId != null){
+                IcwsSessionService.post('/interactions/'+ alertingInteractionId + '/pickup')
+            }
         },
         disconnectSelectedCall: function(){
           $log.debug("disconnecting selected call")

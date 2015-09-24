@@ -102,18 +102,18 @@ $rootScope.$on('initialize', function (event, data) {
 return{
   getInteractions: function(){return interactions;},
   getInteractionCount: function(){ return Object.keys(interactions).length;},
-  hasAlertingInteraction: function(){
+  alertingInteraction: function(){
     for(var id in interactions){
       var interaction = interactions[id];
 
       if(interaction.getAttribute(ININ.Addins.IC.Interactions.attributeNames.state) === ININ.Addins.IC.Interactions.stateAttributeValues.alerting ||
       interaction.getAttribute(ININ.Addins.IC.Interactions.attributeNames.state) === ININ.Addins.IC.Interactions.stateAttributeValues.offering)
     {
-      return true;
+      return id;
     }
 
   }
-  return false;
+  return null;
 }
 };
 

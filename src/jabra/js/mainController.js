@@ -1,4 +1,4 @@
-clientaddin.controller('MainController', function($scope, $rootScope,$log ,JabraDeviceService, QueueService){
+clientaddin.controller('MainController', function($scope, $rootScope,$log ,JabraDeviceService){
     $scope.$watch(function () {
         return JabraDeviceService.isConnected();
     }, function (data) {
@@ -26,9 +26,4 @@ clientaddin.controller('MainController', function($scope, $rootScope,$log ,Jabra
     }, function (data) {
         $scope.activeDevice = data;
     }, true);
-
-    $scope.updateActiveDevice = function(){
-      $log.debug("update active device to " + $scope.activeDevice);
-      JabraDeviceService.setActiveDevice($scope.activeDevice);
-    };
 });

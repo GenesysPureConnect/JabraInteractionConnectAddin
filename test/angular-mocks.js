@@ -20,7 +20,7 @@ angular.mock = {};
  * ! This is a private undocumented service !
  *
  * @name $browser
- *
+ * 
  * @description
  * This service is a mock implementation of {@link ng.$browser}. It provides fake
  * implementation for commonly used browser apis that are hard to test, e.g. setTimeout, xhr,

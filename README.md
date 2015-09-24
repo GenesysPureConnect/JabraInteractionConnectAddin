@@ -1,6 +1,7 @@
 Unit Testing
-make sure to install the karma and jasmine
+to run Karma execute
 
-npm install karma --save-dev
-npm install karma-phantomjs-launcher --save-dev
-npm install karma-jasmine --save-dev
+    karma start
+
+code coverage can be found at
+coverage/Chrome\ 42.0.2311\ \(Mac\ OS\ X\ 10.10.3\)/index.html

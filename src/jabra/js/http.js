@@ -10,7 +10,7 @@ clientaddin.factory('http', function ($log) {
 
       if(onError){
         responseData = JSON.parse(req.responseText);
-        onSuccess(responseData, req.status);
+        onError(responseData, req.status);
       }
     }
     req.onload = function(e) {

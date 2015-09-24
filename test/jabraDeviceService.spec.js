@@ -1,85 +1,169 @@
 describe('jabraDeviceService', function() {
 
 
-  beforeEach(function() { angular.mock.module('clientaddin'); });
+    beforeEach(function() { angular.mock.module('clientaddin'); });
 
-  var JabraDeviceService;
+    var JabraDeviceService;
 
-  var WebSocketMock = {
-    send: function(data){}
-  };
+    var WebSocketMock = {
+        send: function(data){}
+    };
 
-  var   WebsocketServiceMock = {
-    create: function(url){
-      return WebSocketMock;
-    }
-  };
-  beforeEach(function(){
-    module(function($provide){
-      $provide.value('WebsocketService', WebsocketServiceMock);
-    });
+    var   WebsocketServiceMock = {
+        create: function(url){
+            return WebSocketMock;
+        }
+    };
 
-    inject(function($rootScope, _JabraDeviceService_){
-      JabraDeviceService = _JabraDeviceService_;
-    })
-  });
+    var   InteractionServiceMock = {
+        answerAlertingCall: function(){
 
-  beforeEach(function(){
-    var realWS= WebSocket;
+        },
+        disconnectSelectedCall: function(){
 
-    WSSpy = spyOn(window, "WebSocket").and.callFake(function(url,protocols){
-      return new realWS(url,protocols);
-    });
-  });
+        }
+    };
 
-  describe("when connecting", function(){
-    it('should connect to web socket', function(){
-      spyOn(WebsocketServiceMock, 'create').and.callThrough();
+    var   QueueServiceMock = {
+        alertingInteraction:function(){
+            return false;
+        }
+    };
 
-      JabraDeviceService.connect();
-      expect(WebsocketServiceMock.create).toHaveBeenCalledWith("ws://localhost:8080");
-
-      expect(JabraDeviceService.isConnecting()).toEqual(false);
-    })
-  });
-
-  describe("After connected", function(){
     beforeEach(function(){
-      JabraDeviceService.connect();
+        module(function($provide){
+            $provide.value('WebsocketService', WebsocketServiceMock);
+            $provide.value('InteractionService', InteractionServiceMock);
+            $provide.value('QueueService', QueueServiceMock);
+        });
+
+        inject(function($rootScope, _JabraDeviceService_){
+            rootScope = $rootScope;
+            JabraDeviceService = _JabraDeviceService_;
+        })
     });
 
-    it('should show connected', function(){
-      WebSocketMock.onopen();
-      expect(JabraDeviceService.isConnected()).toBeTruthy();
+    beforeEach(function(){
+        var realWS= WebSocket;
+
+        WSSpy = spyOn(window, "WebSocket").and.callFake(function(url,protocols){
+            return new realWS(url,protocols);
+        });
     });
-  });
-  /*
-  it('says hello world!', function () {
-  var realWS= WebSocket;
-  var sendSpy = spyOn(WebSocket.prototype, "send").and.callFake(function(outMsg){
-  if(outMsg == "outgoing message"){
-  this.onmessage("incoming mocked message goes here");
-}
-});
-// var messageSpy = spyOn(WebSocket.prototype, "onmessage");//.and.returnValue("mock message goes here");
-var WSSpy = spyOn(window, "WebSocket").and.callFake(function(url,protocols){
-return new realWS(url,protocols);
-});
-var onmessageCallbackSpy = jasmine.createSpy('onmessageCallback');
 
-// Your code
-// (function init(url, onmessageCallbackSpy){
-var ws = new WebSocket("ws://some/where");
-ws.onmessage = onmessageCallbackSpy;
-// code that results with receiving a message
-// or mocked send, that calls `.onmessage` immediately
-ws.send("outgoing message");
-// })();
+    describe("when connecting", function(){
+        it('should connect to web socket', function(){
+            spyOn(WebsocketServiceMock, 'create').and.callThrough();
 
-expect(WSSpy).toHaveBeenCalledWith("ws://some/where");
-expect(onmessageCallbackSpy).toHaveBeenCalledWith("mock message goes here");
-done();
-});
+            JabraDeviceService.connect();
+            expect(WebsocketServiceMock.create).toHaveBeenCalledWith("ws://localhost:8080");
 
-*/
+            expect(JabraDeviceService.isConnecting()).toEqual(false);
+        })
+    });
+
+    describe("After connected", function(){
+        beforeEach(function(){
+            JabraDeviceService.connect();
+        });
+
+        it('should show connected', function(){
+            WebSocketMock.onopen();
+            expect(JabraDeviceService.isConnected()).toBeTruthy();
+        });
+
+        it('should call get devices and get state', function(){
+            spyOn(WebSocketMock, 'send').and.callThrough();
+            WebSocketMock.onopen();
+
+            expect(WebSocketMock.send).toHaveBeenCalledWith("GetState");
+            expect(WebSocketMock.send).toHaveBeenCalledWith("GetDevices");
+        });
+
+        it('should show connected when closed', function(){
+            WebSocketMock.onopen();
+            WebSocketMock.onclose();
+            expect(JabraDeviceService.isConnected()).toBeFalsy();
+        });
+    });
+    describe("When receiving events", function(){
+        beforeEach(function(){
+            JabraDeviceService.connect();
+        });
+
+        it('should handle device add/remove messages', function(){
+            var addedDevice = "Test Device";
+            WebSocketMock.onmessage({data:"DeviceAdded " + addedDevice});
+
+            expect(JabraDeviceService.devices().indexOf(addedDevice) > -1).toBeTruthy();
+
+            WebSocketMock.onmessage({data:"DeviceRemoved FakeDevice" });
+            expect(JabraDeviceService.devices().length).toEqual(1);
+
+            WebSocketMock.onmessage({data:"DeviceRemoved " + addedDevice});
+
+            expect(JabraDeviceService.devices().indexOf(addedDevice) == -1).toBeTruthy();
+            expect(JabraDeviceService.devices().length).toEqual(0);
+        });
+
+        it('should set the active device', function(){
+            var addedDevice = "Test Device";
+            WebSocketMock.onmessage({data:"ActiveDevice " + addedDevice});
+
+            expect(JabraDeviceService.devices().indexOf(addedDevice) > -1).toBeTruthy();
+            expect(JabraDeviceService.activeDevice()).toEqual(addedDevice);
+
+        });
+
+        it('should answer an alerting call and respond with off hook', function(){
+            spyOn(InteractionServiceMock, 'answerAlertingCall').and.callThrough();
+            spyOn(WebSocketMock, 'send').and.callThrough();
+            WebSocketMock.onmessage({data:"AcceptCall"});
+
+            expect(InteractionServiceMock.answerAlertingCall).toHaveBeenCalled();
+            expect(WebSocketMock.send).toHaveBeenCalledWith("OffHook");
+
+        });
+
+        it('should disconnect selected call and respond with on hook', function(){
+            spyOn(InteractionServiceMock, 'disconnectSelectedCall').and.callThrough();
+            spyOn(WebSocketMock, 'send').and.callThrough();
+            WebSocketMock.onmessage({data:"EndCall"});
+
+            expect(InteractionServiceMock.disconnectSelectedCall).toHaveBeenCalled();
+            expect(WebSocketMock.send).toHaveBeenCalledWith("OnHook");
+
+        });
+
+    });
+
+    describe('When connected interaction count changes', function(){
+        it('should send offhook command if connected count is >0', function(){
+            spyOn(WebSocketMock, 'send').and.callThrough();
+            rootScope.$broadcast('ConnectedInteractionCount', 1);
+            expect(WebSocketMock.send).toHaveBeenCalledWith("OffHook");
+        });
+
+        it('should send onhook command if connected count is = 0', function(){
+            spyOn(WebSocketMock, 'send').and.callThrough();
+            rootScope.$broadcast('ConnectedInteractionCount', 0);
+            expect(WebSocketMock.send).toHaveBeenCalledWith("OnHook");
+        });
+    });
+
+    describe('When a call is alerting', function(){
+        it('should send the ring command', function(){
+            spyOn(WebSocketMock, 'send').and.callThrough();
+            rootScope.$broadcast('InteractionAlerting', 1);
+            expect(WebSocketMock.send).toHaveBeenCalledWith("Ring");
+        });
+    });
+
+    describe('When initialized', function(){
+        it('should send the onhook command', function(){
+            spyOn(WebSocketMock, 'send').and.callThrough();
+            rootScope.$broadcast('initialize', 1);
+            expect(WebSocketMock.send).toHaveBeenCalledWith("OnHook");
+        });
+    });
 });
