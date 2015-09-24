@@ -1,6 +1,6 @@
-var clientaddin = angular.module('connectaddin',[]);
+var clientaddin = angular.module('clientaddin',[]);
 
-
+/*
 //from http://solutionoptimist.com/2013/10/07/enhance-angularjs-logging-using-decorators/
 clientaddin.config([ "$provide", function( $provide )
 {
@@ -12,27 +12,21 @@ clientaddin.config([ "$provide", function( $provide )
         var debugFn = $delegate.debug;
         var errorFn = $delegate.error;
 
-
-
         $delegate.debug = function( )
         {
             var args    = [].slice.call(arguments)
-
             // Prepend timestamp
             args[0] = "JABRA_ADDIN - " +  args[0];
-
             // Call the original with the output prepended with formatted timestamp
             debugFn.apply(null, args)
         };
 
-        
+
         $delegate.error = function( )
         {
             var args    = [].slice.call(arguments)
-
             // Prepend timestamp
             args[0] = "JABRA_ADDIN - " +  args[0];
-
             // Call the original with the output prepended with formatted timestamp
             errorFn.apply(null, args)
         };
@@ -40,3 +34,4 @@ clientaddin.config([ "$provide", function( $provide )
         return $delegate;
     }]);
 }]);
+*/

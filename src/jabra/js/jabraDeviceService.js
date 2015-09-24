@@ -1,4 +1,4 @@
-clientaddin.factory('JabraDeviceService', function($interval, $rootScope, $log, QueueService, InteractionService){
+clientaddin.factory('JabraDeviceService', function($interval, $rootScope, $log, WebsocketService, QueueService, InteractionService){
     isConnected = false;
     isConnecting = false;
     hookState = null;
@@ -8,8 +8,9 @@ clientaddin.factory('JabraDeviceService', function($interval, $rootScope, $log, 
     activeDevice = '';
     onOkGetDeviceState = false;
     interactionCount = 0;
+    offHookState = false;
 
-    reply = {
+    deviceevent = {
         DeviceAdded: 'DeviceAdded ',
         DeviceRemoved: 'DeviceRemoved ',
         AcceptCall:'AcceptCall',
@@ -45,36 +46,40 @@ clientaddin.factory('JabraDeviceService', function($interval, $rootScope, $log, 
     }
 
     function handleMessage(data){
-        if(data.indexOf(reply.Device) == 0){
-            devices.push(data.replace(reply.Device,""));
+        if(data.indexOf(deviceevent.Device) == 0){
+            devices.push(data.replace(deviceevent.Device,""));
         }
-        else if(data.indexOf(reply.DeviceAdded) ==0){
-            devices.push(data.replace(reply.DeviceAdded,""));
+        else if(data.indexOf(deviceevent.DeviceAdded) ==0){
+            devices.push(data.replace(deviceevent.DeviceAdded,""));
         }
-        else if(data.indexOf(reply.ActiveDevice) ==0){
-            devices.push(data.replace(reply.ActiveDevice,""));
-            activeDevice = data.replace(reply.ActiveDevice,"");
+        else if(data.indexOf(deviceevent.ActiveDevice) ==0){
+            devices.push(data.replace(deviceevent.ActiveDevice,""));
+            activeDevice = data.replace(deviceevent.ActiveDevice,"");
         }
-        else if(data.indexOf(reply.DeviceRemoved) ==0){
-          var device = data.replace(reply.DeviceRemoved,"");
+        else if(data.indexOf(deviceevent.DeviceRemoved) ==0){
+          var device = data.replace(deviceevent.DeviceRemoved,"");
           var deviceIndex = devices.indexOf(device);
 
           if(deviceIndex > -1){
             devices.splice(device.index,1);
           }
         }
-        else if(data.indexOf(reply.HoldState) ==0){
-            holdState = Boolean(data.replace(reply.HoldState,''));
+        else if(data.indexOf(deviceevent.HoldState) ==0){
+            holdState = Boolean(data.replace(deviceevent.HoldState,''));
         }
-        else if(data.indexOf(reply.HookState) ==0){
-            offHookState = data.replace(reply.HookState,'') == "True";
+        else if(data.indexOf(deviceevent.HookState) ==0){
+            offHookState = data.replace(deviceevent.HookState,'') == "True";
         }else if (data == 'ConfirmRequestOk' && onOkGetDeviceState){
-          onOkGetDeviceState = false;
+            onOkGetDeviceState = false;
             sendCommand(command.GetState);
         }
-        else if(data.indexOf(event.AcceptCall) ==0){
+        else if(data.indexOf(deviceevent.AcceptCall) ==0){
           InteractionService.answerAlertingCall();
         }
+        else if(data.indexOf(deviceevent.EndCall) ==0){
+          InteractionService.disconnectSelectedCall();
+        }
+
 
          angularApply();
     }
@@ -104,10 +109,11 @@ clientaddin.factory('JabraDeviceService', function($interval, $rootScope, $log, 
         $log.debug("connecting to websocket")
         isConnecting = true;
         try{
-            ws = new WebSocket('ws://localhost:8080');
+            ws = WebsocketService.create('ws://localhost:8080');
 
             // when data is comming from the server, this metod is called
             ws.onmessage = function (evt) {
+              console.log('on message')
                 $log.debug("websocket message received " + JSON.stringify(evt.data));
                 handleMessage(evt.data);
             }
