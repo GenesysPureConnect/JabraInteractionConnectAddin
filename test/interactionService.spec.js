@@ -8,7 +8,8 @@ describe('InteractionService', function() {
     };
 
     var QueueServiceMock = {
-        alertingInteraction: function(){}
+        alertingInteraction: function(){},
+        connectedCall: function(){}
     };
 
     beforeEach(function(){
@@ -40,17 +41,16 @@ describe('InteractionService', function() {
         it('should do nothing if selected interaction id == null', function(){
             spyOn(IcwsSessionServiceMock, 'post').and.callThrough();
 
-            InteractionService.disconnectSelectedCall();
+            InteractionService.disconnectConnectedCall();
             expect(IcwsSessionServiceMock.post).not.toHaveBeenCalled();
 
         })
 
         it('should call the icws disconnect on the selected call', function(){
-            ININ.Addins.IC.Interactions.selectedInteraction.interactionId = 1234;
-
+            spyOn(QueueServiceMock,'connectedCall').and.returnValue('1234')
             spyOn(IcwsSessionServiceMock, 'post').and.callThrough();
 
-            InteractionService.disconnectSelectedCall();
+            InteractionService.disconnectConnectedCall();
             expect(IcwsSessionServiceMock.post).toHaveBeenCalledWith('/interactions/1234/disconnect');
 
         })

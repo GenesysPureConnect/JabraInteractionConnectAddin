@@ -1,7 +1,6 @@
 clientaddin.factory('http', function ($log) {
 
   return function(data, onSuccess, onError){
-    $log.debug('impl')
     var req = new XMLHttpRequest();
 
     req.onerror = function(e){
@@ -14,15 +13,18 @@ clientaddin.factory('http', function ($log) {
       }
     }
     req.onload = function(e) {
-      $log.debug("onload")
-
       if(onSuccess){
-        responseData = JSON.parse(req.responseText);
-        onSuccess(responseData, req.status);
+        try{
+          responseData = JSON.parse(req.responseText);
+          onSuccess(responseData, req.status);
+        }
+        catch(err){
+          $log.debug("Unable to parse: " + req.responseText);
+          onSuccess({}, req.status);
+        }
       }
     };
 
-    $log.debug(data)
     req.open(data.method, data.url, true)
 
     req.withCredentials = true;

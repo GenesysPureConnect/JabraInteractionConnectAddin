@@ -1,16 +1,24 @@
-clientaddin.factory('IcwsSessionService', function ($rootScope, $log, http) {
+clientaddin.factory('IcwsSessionService', function ($rootScope, $log, $interval, http) {
   isConnected = false;
   serverUrl = '';
   sessionId = null;
   csrfToken = null;
+  messagePollInterval = null;
 
   function getConnection(){
     var baseUrl = ININ.Addins.IC.getIcwsBaseUrl();
-    console.log("get connection")
+    $log.debug("Getting ICWS connection " + baseUrl);
+
     ININ.Addins.IC.requestIcwsConnectionRequestSettings().then(function(connectionRequestSettings) {
-       // POST icws/connection
-       console.log("promise")
-       connect(baseUrl,connectionRequestSettings);
+
+       connect(baseUrl,connectionRequestSettings, function(){
+
+             messagePollInterval = $interval(function(){
+               //keep polling so that we can keep our connection alive.
+               get('/messaging/messages');
+             }, 5000);
+
+     });
 
     });
   }
@@ -25,7 +33,7 @@ clientaddin.factory('IcwsSessionService', function ($rootScope, $log, http) {
       });
   });
 
-  function connect(url, connectData){
+  function connect(url, connectData, onSuccess){
     serverUrl = url;
     $log.debug("Getting ICWS session from " + serverUrl);
     var requestData = {
@@ -42,9 +50,33 @@ clientaddin.factory('IcwsSessionService', function ($rootScope, $log, http) {
                                 $log.debug("got icws session");
                                 sessionId = data.sessionId;
                                 csrfToken = data.csrfToken;
+
+                                if(onSuccess){
+                                  onSuccess();
+                                }
                             }, function (data, status) {
                                 $log.error("Unable to connect to ICWS session " + data )
                             });
+  }
+
+  function get(url, onSuccess, onFailure){
+      http({
+        method:'GET',
+        url: serverUrl + '/icws/' + sessionId + url,
+        headers:{
+          'ININ-ICWS-CSRF-Token' : csrfToken
+        },
+        timeout:2000
+      },function (data, status) {
+          if(onSuccess){
+            onSuccess(data,status);
+          }
+
+      },function (data, status) {
+        if(onFailure){
+          onFailure(data,status);
+        }
+      });
   }
 
   return{

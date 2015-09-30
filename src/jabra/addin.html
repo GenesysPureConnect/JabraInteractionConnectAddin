@@ -13,6 +13,8 @@
   <script src="js/mainController.js"></script>
   <script src="js/icwsSessionService.js"></script>
   <script src="js/interactionService.js"></script>
+  <script src="js/websocketService.js"></script>
+  <script src="js/logFormatter.js"></script>
   <style>
   .pad-left{
     margin-left:5px;
@@ -42,10 +44,8 @@
     </div>
     <div class='clearfix form-inline'>
       <div class='form-group'>
-        <label >Active Device:</label>
-        <select class=' pad-left form-control' ng-model='activeDevice' ng-change='updateActiveDevice()'>
-          <option ng-repeat="d in devices" value="{{d}}">{{d}}</option>
-      </select>
+        <label >Active Device:</label> <div>{{activeDevice}}</div>
+        
     </div>
     <!--
     <div class='clearfix form-inline'>

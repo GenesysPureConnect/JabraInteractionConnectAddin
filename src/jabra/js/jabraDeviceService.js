@@ -6,6 +6,7 @@ clientaddin.factory('JabraDeviceService', function($interval, $rootScope, $log, 
     muteState = null;
     devices = [];
     activeDevice = '';
+    onOkGetDeviceState = false;
     interactionCount = 0;
     offHookState = false;
 
@@ -17,6 +18,8 @@ clientaddin.factory('JabraDeviceService', function($interval, $rootScope, $log, 
         Device:'Device ',
         ActiveDevice:'ActiveDevice ',
         HoldState:'State HoldState is ',
+        HoldCall: 'HoldCall',
+        ResumeCall: 'ResumeCall',
         HookState: 'State OffhookState is ',
         ConfirmRequestOk : 'ConfirmRequestOk'
     }
@@ -30,7 +33,9 @@ clientaddin.factory('JabraDeviceService', function($interval, $rootScope, $log, 
         GetDevices:'GetDevices',
         GetActiveDevice:'GetActiveDevice',
         SetActiveDevice: 'SetDevice ',
-        GetState: 'GetState'
+        GetState: 'GetState',
+        Hold: 'Hold',
+        Resume: 'Resume'
     }
 
     function angularApply(){
@@ -42,6 +47,13 @@ clientaddin.factory('JabraDeviceService', function($interval, $rootScope, $log, 
     function sendCommand(command){
         $log.debug("sending command " + command);
         ws.send(command);
+
+        if(command == command.OnHook){
+          $log.debug("on hook")
+        }
+        else if(command == command.OffHook){
+          $log.debug("off hook")
+        }
     }
 
     function handleMessage(data){
@@ -63,15 +75,29 @@ clientaddin.factory('JabraDeviceService', function($interval, $rootScope, $log, 
             devices.splice(device.index,1);
           }
         }
-        else if(data.indexOf(deviceevent.AcceptCall) ==0){
-          InteractionService.answerAlertingCall();
+        else if (data.indexOf(deviceevent.HoldCall) == 0){
+          sendCommand(command.Hold);
+        }
+        else if (data.indexOf(deviceevent.ResumeCall) == 0){
+          sendCommand(command.Resume);
           sendCommand(command.OffHook);
         }
-        else if(data.indexOf(deviceevent.EndCall) ==0){
-          InteractionService.disconnectSelectedCall();
-          sendCommand(command.OnHook);
+        else if(data.indexOf(deviceevent.HoldState) ==0){
+            holdState = Boolean(data.replace(deviceevent.HoldState,''));
         }
+        else if(data.indexOf(deviceevent.HookState) ==0){
 
+            offHookState = data.replace(deviceevent.HookState,'') == "True";
+        }else if (data == 'ConfirmRequestOk' && onOkGetDeviceState){
+            onOkGetDeviceState = false;
+            sendCommand(command.GetState);
+        }
+        else if(data.indexOf(deviceevent.AcceptCall) ==0){
+          InteractionService.answerAlertingCall();
+        }
+        else if(data.indexOf(deviceevent.EndCall) ==0){
+          InteractionService.disconnectConnectedCall();
+        }
          angularApply();
     }
 
@@ -79,7 +105,7 @@ clientaddin.factory('JabraDeviceService', function($interval, $rootScope, $log, 
       $log.debug('device service, interaction count ' + JSON.stringify(data));
       $log.debug('offHookState ' + JSON.stringify(offHookState));
       interactionCount = data;
-      if(data > 0 && offHookState !== true && !QueueService.alertingInteraction()){
+      if(data > 0 && offHookState !== true && QueueService.alertingInteraction() === null){
         sendCommand(command.OffHook);
       }
       else if(data ==0){
@@ -149,6 +175,10 @@ clientaddin.factory('JabraDeviceService', function($interval, $rootScope, $log, 
         },
         devices:function(){
             return devices;
+        },
+        setActiveDevice:function(deviceName){
+            sendCommand(command.SetActiveDevice + deviceName);
+          onOkGetDeviceState = true;
         }
     }
 });

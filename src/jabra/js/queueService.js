@@ -114,7 +114,19 @@ return{
 
   }
   return null;
-}
+},
+connectedCall: function(){
+  for(var id in interactions){
+    var interaction = interactions[id];
+
+    if(interaction.getAttribute(ININ.Addins.IC.Interactions.attributeNames.state) === ININ.Addins.IC.Interactions.stateAttributeValues.connected)
+    {
+      return id;
+    }
+
+  }
+  return null;
+  }
 };
 
 });

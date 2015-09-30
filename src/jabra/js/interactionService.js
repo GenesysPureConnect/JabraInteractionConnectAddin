@@ -7,9 +7,9 @@ clientaddin.factory('InteractionService', function ($rootScope, $log, QueueServi
                 IcwsSessionService.post('/interactions/'+ alertingInteractionId + '/pickup')
             }
         },
-        disconnectSelectedCall: function(){
+        disconnectConnectedCall: function(){
           $log.debug("disconnecting selected call")
-          var selectedCallId = ININ.Addins.IC.Interactions.selectedInteraction.interactionId;
+          var selectedCallId = QueueService.connectedCall();
 
           if(selectedCallId == null){
             return;

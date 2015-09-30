@@ -1,19 +1,23 @@
 describe('IcwsSessionService', function() {
     beforeEach(function() { angular.mock.module('clientaddin'); });
 
-    var httpMock =  function(data, onSuccess, onFailure){
+    httpCalled = false;
+    httpMock =  function(data, onSuccess, onFailure){
+      httpCalled = true;
         onSuccess({sessionId: '1234', csrfToken:'abcd'}, 201);
     };
 
     var deferred = null;
 
     beforeEach(function(){
-
+        httpCalled = false;
         module(function($provide){
             $provide.value('http', httpMock);
         });
 
-        inject(function($rootScope, _IcwsSessionService_, $q){
+        inject(function($rootScope, _$interval_, _IcwsSessionService_, $q){
+            $interval = _$interval_;
+
             ININ = {
                 Addins:{
                     IC:{
@@ -56,5 +60,7 @@ describe('IcwsSessionService', function() {
         }, function(){
             fail();
         })
+
+        expect(httpCalled).toBeTruthy();
     });
 });

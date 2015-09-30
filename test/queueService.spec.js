@@ -40,7 +40,8 @@ describe('QueueService', function() {
                         },
                         stateAttributeValues:{
                             alerting: "ALERTING",
-                            offering: "OFFERING"
+                            offering: "OFFERING",
+                            connected: "CONNECTED"
                         }
                     },
                     Queues:{
@@ -100,6 +101,21 @@ describe('QueueService', function() {
     describe("For Queue events", function(){
         beforeEach(function(){
             rootScope.$broadcast('initialize');
+        })
+
+        it('should show connected interactions', function(){
+            spyOn(rootScope, '$broadcast').and.callThrough();
+
+
+            var addedInteraction = {
+                interactionId : 1234,
+                getAttribute: function(){
+                    return ININ.Addins.IC.Interactions.stateAttributeValues.connected;
+                }
+            }
+
+            addedCallback(addedInteraction);
+            expect(QueueService.connectedCall()).toEqual('1234');
         })
 
         it('should alert on alerting interactions', function(){
