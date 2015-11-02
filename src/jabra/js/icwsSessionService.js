@@ -46,6 +46,7 @@ clientaddin.factory('IcwsSessionService', function ($rootScope, $log, $interval,
         timeout: 2000,
         data: connectData
     };
+
     http(requestData, function (data, status) {
                                 $log.debug("got icws session");
                                 sessionId = data.sessionId;
@@ -81,15 +82,20 @@ clientaddin.factory('IcwsSessionService', function ($rootScope, $log, $interval,
 
   return{
     post:function(url, data, onSuccess, onFailure){
-      http({
+      var options = {
         method:'POST',
         url: serverUrl + '/icws/' + sessionId + url,
         headers:{
           'ININ-ICWS-CSRF-Token' : csrfToken
         },
-        timeout:2000,
-        data: data
-      },function (data, status) {
+        timeout:2000
+      };
+
+      if(data){
+        options.data = data;
+      }
+
+      http(options,function (data, status) {
           if(onSuccess){
             onSuccess(data,status);
           }

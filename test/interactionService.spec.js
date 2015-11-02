@@ -38,13 +38,6 @@ describe('InteractionService', function() {
     });
 
     describe("when calling disconnect selected call", function(){
-        it('should do nothing if selected interaction id == null', function(){
-            spyOn(IcwsSessionServiceMock, 'post').and.callThrough();
-
-            InteractionService.disconnectConnectedCall();
-            expect(IcwsSessionServiceMock.post).not.toHaveBeenCalled();
-
-        })
 
         it('should call the icws disconnect on the selected call', function(){
             spyOn(QueueServiceMock,'connectedCall').and.returnValue('1234')
@@ -57,15 +50,6 @@ describe('InteractionService', function() {
     });
 
     describe("when calling answer alerting call", function(){
-        it('should do nothing there are no alerting calls', function(){
-            spyOn(QueueServiceMock, 'alertingInteraction').and.returnValue(null);
-            spyOn(IcwsSessionServiceMock, 'post').and.callThrough();
-
-            InteractionService.answerAlertingCall();
-            expect(IcwsSessionServiceMock.post).not.toHaveBeenCalled();
-
-        })
-
         it('should call the icws pickup on the alerting call', function(){
             spyOn(QueueServiceMock, 'alertingInteraction').and.returnValue(1234);
             spyOn(IcwsSessionServiceMock, 'post').and.callThrough();

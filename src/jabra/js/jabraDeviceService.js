@@ -76,17 +76,19 @@ clientaddin.factory('JabraDeviceService', function($interval, $rootScope, $log, 
           }
         }
         else if (data.indexOf(deviceevent.HoldCall) == 0){
-          sendCommand(command.Hold);
+          InteractionService.holdConnectedCall(function(){
+            sendCommand(command.Hold);
+          });
         }
         else if (data.indexOf(deviceevent.ResumeCall) == 0){
-          sendCommand(command.Resume);
-          sendCommand(command.OffHook);
+          InteractionService.pickupHeldCall(function(){
+            sendCommand(command.Resume);
+          });
         }
         else if(data.indexOf(deviceevent.HoldState) ==0){
             holdState = Boolean(data.replace(deviceevent.HoldState,''));
         }
         else if(data.indexOf(deviceevent.HookState) ==0){
-
             offHookState = data.replace(deviceevent.HookState,'') == "True";
         }else if (data == 'ConfirmRequestOk' && onOkGetDeviceState){
             onOkGetDeviceState = false;

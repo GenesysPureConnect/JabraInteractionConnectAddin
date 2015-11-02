@@ -3,6 +3,8 @@ clientaddin.factory('QueueService', function ($rootScope, $log, InitializationSe
   interactions={};
   queue = null;
 
+  var lastConnectedInteractionCount = -1;
+
   function broadcastConnectedInteractionCount(){
 
     var interactionCount = 0;
@@ -17,8 +19,10 @@ clientaddin.factory('QueueService', function ($rootScope, $log, InitializationSe
     }
   }
 
-  $rootScope.$broadcast("ConnectedInteractionCount" , interactionCount);
-
+  if(lastConnectedInteractionCount != interactionCount){
+    $rootScope.$broadcast("ConnectedInteractionCount" , interactionCount);
+    lastConnectedInteractionCount = interactionCount;
+  }
 }
 
 function startWatches(){
@@ -54,15 +58,15 @@ queue.on("interactionChanged", function(changedInteraction) {
   return;
 }
 */
-$log.debug("The interaction with ID", changedInteraction.interactionId, "was changed.");
+  $log.debug("The interaction with ID", changedInteraction.interactionId, "was changed.");
 
-interactions[changedInteraction.interactionId] = changedInteraction;
+  interactions[changedInteraction.interactionId] = changedInteraction;
 
-broadcastConnectedInteractionCount();
+  broadcastConnectedInteractionCount();
 
-if (!$rootScope.$$phase) {
-  $rootScope.$apply();
-}
+  if (!$rootScope.$$phase) {
+    $rootScope.$apply();
+  }
 });
 queue.on("interactionRemoved", function(removedEvent) {
   $log.debug("The interaction with ID", removedEvent.interactionId, "was removed.");
@@ -114,6 +118,18 @@ return{
 
   }
   return null;
+},
+heldInteraction: function(){
+  for(var id in interactions){
+    var interaction = interactions[id];
+
+    if(interaction.getAttribute(ININ.Addins.IC.Interactions.attributeNames.state) === ININ.Addins.IC.Interactions.stateAttributeValues.held)
+  {
+    return id;
+  }
+
+}
+return null;
 },
 connectedCall: function(){
   for(var id in interactions){
